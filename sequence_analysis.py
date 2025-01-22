@@ -32,26 +32,33 @@ def process_file(file, primer_fwd, primer_rev, min_len, max_len, output_dir):
             counts[region] = counts.get(region, 0) + 1
 
     # Write intermediate results to a CSV file
-    output_file = os.path.join(output_dir, f"{os.path.basename(file)}_counts.csv")
-    pd.DataFrame(list(counts.items()), columns=["Sequence", "Count"]).to_csv(output_file, index=False)
+    sample_name = os.path.basename(file).split(".")[0]
+    output_file = os.path.join(output_dir, f"{sample_name}_counts.csv")
+    pd.DataFrame(list(counts.items()), columns=["Sequence", sample_name]).to_csv(output_file, index=False)
     return output_file
 
 def merge_intermediate_files(intermediate_files, output_file):
     """
-    Merge all intermediate CSV files into a single consolidated DataFrame and save as CSV.
+    Merge all intermediate CSV files into a single DataFrame with separate columns for each file.
     """
-    merged_counts = {}
+    merged_df = None
 
     for file in intermediate_files:
+        # Read intermediate file
         df = pd.read_csv(file)
-        for _, row in df.iterrows():
-            seq = row["Sequence"]
-            count = row["Count"]
-            merged_counts[seq] = merged_counts.get(seq, 0) + count
+        sample_name = os.path.basename(file).split("_counts.csv")[0]
 
-    # Convert merged counts to DataFrame
-    merged_df = pd.DataFrame(list(merged_counts.items()), columns=["Sequence", "Count"])
-    merged_df.sort_values(by="Count", ascending=False, inplace=True)
+        if merged_df is None:
+            # Initialize the merged DataFrame with the first file
+            merged_df = df
+        else:
+            # Merge on the "Sequence" column, keeping separate columns for counts
+            merged_df = pd.merge(merged_df, df, on="Sequence", how="outer")
+
+    # Fill NaN with 0 for sequences not present in all files
+    merged_df.fillna(0, inplace=True)
+
+    # Save the merged DataFrame
     merged_df.to_csv(output_file, index=False)
 
 def process_files_parallel(file_list, primer_fwd, primer_rev, min_len, max_len, num_processes, output_dir):
