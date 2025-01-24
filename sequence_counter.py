@@ -1,3 +1,14 @@
+"""
+Python 3.12.5
+Install required packages: pip3 install biopython pandas
+Modify parameters in main() function: 
+     - List of input FASTQ files (`file_list`).
+     - Forward and reverse primer sequences (`primer_fwd` and `primer_rev`).
+     - Minimum and maximum length of variable region (`min_len` and `max_len`).
+     - Output file path (`output_file`).
+Run: python3 sequence_analysis.py
+"""
+
 import os
 import pandas as pd
 from Bio import SeqIO
