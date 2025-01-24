@@ -6,7 +6,7 @@ Modify parameters in main() function:
      - Forward and reverse primer sequences (`primer_fwd` and `primer_rev`).
      - Minimum and maximum length of variable region (`min_len` and `max_len`).
      - Output file path (`output_file`).
-Run: python3 sequence_analysis.py
+Run: python3 sequence_counter.py
 """
 
 import os
